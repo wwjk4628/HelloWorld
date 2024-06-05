@@ -2,7 +2,10 @@ package himedia;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.logging.Logger;
 
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,10 +13,34 @@ import jakarta.servlet.http.HttpServletResponse;
 
 //@WebServlet("/hs") // URL 패턴 지정 이걸로 servlet mapping 생략가능
 public class HelloServlet extends HttpServlet {
+	
+	private static final Logger logger = Logger.getLogger("HelloServlet");
+	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		logger.info("[lifeCycle]: init");
+		super.init(config);
+	}
+
+
+	@Override
+	protected void service(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException {
+		logger.info("[lifeCycle]: service");
+		super.service(arg0, arg1);
+	}
+
+
+	@Override
+	public void destroy() {
+		logger.info("[lifeCycle]:destory");
+		super.destroy();
+	}
+
 
 	@Override
 	protected void doGet(HttpServletRequest req, 
 			HttpServletResponse resp) throws ServletException, IOException {
+		logger.info("[lifeCycle]: doGet");
 		resp.setContentType("text/html; charset=UTF-8");
 		
 		// 사용자로부터 name 파라미터를 전달 받아서 출력
@@ -31,4 +58,38 @@ public class HelloServlet extends HttpServlet {
 		out.println("<p>안녕하세요, " + name + "님</p>");
 	}
 
+	
+	@Override
+	protected void doPost(HttpServletRequest req,
+			HttpServletResponse resp) throws ServletException, IOException {
+		logger.info("[lifeCycle]: doPost");
+//		클라이언트의 form으로부터 전달 받은 데이터를 목록 출력
+		resp.setContentType("text/html; charset=UTF-8");
+		
+		PrintWriter out = resp.getWriter();
+//		super.doPost(req, resp);
+		out.println("<h1>폼 데이터 처리</h1>");
+		
+		out.println("<p>폼으로부터 전송된 데이터</p>");
+		
+//		폼으로부터 전송된 파라미터명 확인
+		Enumeration<String> params = req.getParameterNames();		
+		out.println("<ul>");
+		while (params.hasMoreElements()) {
+			String paramName = params.nextElement();
+			out.printf("<li>%s=%s</li>%n", paramName, req.getParameter(paramName));
+		}
+		out.println("</ul>");
+		
+		String first_name = req.getParameter("first_name");
+		String last_name = req.getParameter("last_name");
+		
+		if (first_name == null || last_name == null) {
+			first_name = "무개";
+			last_name = "아";
+		}
+		out.println("<h1>Hello Servlet</h1>");
+		out.println("<p>안녕하세요, " + last_name + first_name + "님</p>");
+	}
+	
 }
